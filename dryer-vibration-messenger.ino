@@ -28,7 +28,9 @@ char* textToSend[] = {"Come and get me while I'm all warm (or wet).",
                       "Washer/Dryer is finished!",
                       "Stop being lazy. Get your clothes.",
                       "Do you want wrinkled or stinky clothes? Hurry up!",
-                      "It's time to move some clothes!"
+                      "It's time to move some clothes!",
+                      "What up, britches, let's get this folding started!",
+                      "Let's get ready to Tumbleeeee!"
                      };
 
 int rawx = 0;
@@ -74,8 +76,8 @@ void setup() {
   pinMode(INPUTY, INPUT);
   pinMode(GREENLED, OUTPUT);
   pinMode(REDLED, OUTPUT);
-  setLEDPWM(GREENLED, HIGH);
-  setLEDPWM(REDLED, HIGH);
+  setLED(GREENLED, HIGH);
+  setLED(REDLED, HIGH);
 
   Serial.println("Setting up Wi-Fi...");
 
@@ -86,12 +88,12 @@ void setup() {
   if (!IsNetworkUp()) {
     Serial.print("Error joining network!");
     delay(10);
-    setLEDPWM(GREENLED, LOW);
-    setLEDPWM(REDLED, LOW);
+    setLED(GREENLED, LOW);
+    setLED(REDLED, LOW);
     dryerState = DISCONNECTED;
   }
 
-  setLEDPWM(REDLED, HIGH);
+  setLED(REDLED, HIGH);
 
   Serial.println("Now running. Debug options:");
   Serial.println("Press '1' to send a test tweet");
@@ -204,7 +206,7 @@ void monitorDryer()
 
       toggleLED(REDLED);
       digitalWrite(GREENLED, !digitalRead(REDLED)); //force alternation
-      
+
       if (takeVibeMeasurement() < VIBE_THRESHOLD)
       {
         Serial.println("Changing dryer state to WAITOFF");
@@ -219,8 +221,8 @@ void monitorDryer()
         startTime = millis();
         waitCheck = true;
         Serial.println("Entered WAITOFF. startTime: " + (String) startTime);
-        setLEDPWM(REDLED, HIGH);
-        setLEDPWM(GREENLED, HIGH);
+        setLED(REDLED, HIGH);
+        setLED(GREENLED, HIGH);
       }
 
       if (takeVibeMeasurement() > VIBE_THRESHOLD)
@@ -240,7 +242,7 @@ void monitorDryer()
           dryerState = WAITON;
           waitCheck = false;
 
-          setLEDPWM(REDLED, HIGH);
+          setLED(REDLED, HIGH);
         }
       }
 
@@ -422,7 +424,7 @@ double takeVibeMeasurement() {
   return mag;
 }
 
-void setLEDPWM(const int led, const bool val) {
+void setLED(const int led, const bool val) {
   digitalWrite(led, val ^ ACTIVELOW);
 }
 
