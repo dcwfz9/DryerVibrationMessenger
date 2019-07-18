@@ -82,7 +82,7 @@ void setup() {
   setupWiFi();
 
   //connect to internet. returns 0 if no connection
-  if (!IsEthernetUp()) {
+  if (!IsNetworkUp()) {
     Serial.print("Error joining network!");
     delay(10);
     digitalWrite(GREENLED, HIGH);
@@ -121,7 +121,7 @@ void loop() {
         Terminal();
 
         //prints status of connection
-        IsEthernetUp();
+        IsNetworkUp();
 
         break;
 
@@ -165,7 +165,7 @@ void monitorDryer()
         Serial.print(F("Check interval: "));
         Serial.println(wdCheckInterval);
 
-        if ( !IsEthernetUp()) {
+        if ( !IsNetworkUp()) {
           // dryerState = DISCONNECTED;
         }
       }
@@ -250,7 +250,7 @@ void monitorDryer()
       //      digitalWrite(REDLED, LOW);
       //
       //      byte i = 0; //used for disconnected state
-      //      while (!IsEthernetUp()) {
+      //      while (!IsNetworkUp()) {
       //
       //        delay(exp(i) * 1000); //wait for exponential time
       //        Serial.print(".");
@@ -296,11 +296,8 @@ boolean setupWiFi()
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
 
-  // give the Ethernet shield a second to initialize:
-  // delay(1000);
-
   //test whether or not client can connect
-  if (IsEthernetUp())
+  if (IsNetworkUp())
   {
     return true;
   } else
@@ -310,7 +307,7 @@ boolean setupWiFi()
 
 }
 
-boolean IsEthernetUp()
+boolean IsNetworkUp()
 {
   if (client.connect(host, 80)) {
     Serial.println("...connected...");
@@ -337,7 +334,7 @@ char* GetAMessage()
 void PostToTwitter(char* charStr)
 {
   Serial.println("Posting to Twitter...");
-  if (!IsEthernetUp())
+  if (!IsNetworkUp())
   {
     Serial.print("Not connected to network. Reconnecting");
     setupWiFi();
