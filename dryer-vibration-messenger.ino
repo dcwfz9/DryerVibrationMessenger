@@ -3,8 +3,9 @@
 
 #define INPUTX 16
 #define INPUTY 14
-#define GREENLED 2
-#define REDLED 0
+#define GREENLED 12
+#define REDLED 13
+#define ACTIVELOW 1
 
 #define WAITONTIME         5000        //In milliseconds
 #define WAITOFFTIME        5000        //In milliseconds
@@ -73,8 +74,8 @@ void setup() {
   pinMode(INPUTY, INPUT);
   pinMode(GREENLED, OUTPUT);
   pinMode(REDLED, OUTPUT);
-  digitalWrite(GREENLED, LOW);
-  digitalWrite(REDLED, LOW);
+  setLEDPWM(GREENLED, HIGH);
+  setLEDPWM(REDLED, HIGH);
 
   Serial.println("Setting up Wi-Fi...");
 
@@ -85,12 +86,12 @@ void setup() {
   if (!IsNetworkUp()) {
     Serial.print("Error joining network!");
     delay(10);
-    digitalWrite(GREENLED, HIGH);
-    digitalWrite(REDLED, HIGH);
+    setLEDPWM(GREENLED, LOW);
+    setLEDPWM(REDLED, LOW);
     dryerState = DISCONNECTED;
   }
 
-  digitalWrite(REDLED, LOW);
+  setLEDPWM(REDLED, HIGH);
 
   Serial.println("Now running. Debug options:");
   Serial.println("Press '1' to send a test tweet");
@@ -102,8 +103,8 @@ void setup() {
 
 void loop() {
   monitorDryer();
-  digitalWrite(GREENLED, !digitalRead(GREENLED)); //blink green light. keep red constant
-  //digitalWrite(REDLED, LOW);
+  //blink green light. keep red constant
+  toggleLED(GREENLED);
 
   if (Serial.available())
   {
@@ -201,9 +202,9 @@ void monitorDryer()
 
     case RUNNING:
 
-      digitalWrite(REDLED, !digitalRead(REDLED));
-      digitalWrite(GREENLED, !digitalRead(REDLED)); //make sure leds dont flash at same time
-
+      toggleLED(REDLED);
+      digitalWrite(GREENLED, !digitalRead(REDLED)); //force alternation
+      
       if (takeVibeMeasurement() < VIBE_THRESHOLD)
       {
         Serial.println("Changing dryer state to WAITOFF");
@@ -218,8 +219,8 @@ void monitorDryer()
         startTime = millis();
         waitCheck = true;
         Serial.println("Entered WAITOFF. startTime: " + (String) startTime);
-        digitalWrite(REDLED, LOW);
-        digitalWrite(GREENLED, LOW);
+        setLEDPWM(REDLED, HIGH);
+        setLEDPWM(GREENLED, HIGH);
       }
 
       if (takeVibeMeasurement() > VIBE_THRESHOLD)
@@ -239,7 +240,7 @@ void monitorDryer()
           dryerState = WAITON;
           waitCheck = false;
 
-          digitalWrite(REDLED, LOW);
+          setLEDPWM(REDLED, HIGH);
         }
       }
 
@@ -304,7 +305,6 @@ boolean setupWiFi()
   {
     return false;
   }
-
 }
 
 boolean IsNetworkUp()
@@ -422,3 +422,10 @@ double takeVibeMeasurement() {
   return mag;
 }
 
+void setLEDPWM(const int led, const bool val) {
+  digitalWrite(led, val ^ ACTIVELOW);
+}
+
+void toggleLED(const int led) {
+  digitalWrite(led, !digitalRead(led));
+}
